@@ -1,19 +1,26 @@
 // app/api/chat/route.ts
+
 import { google } from '@ai-sdk/google';
-import { streamText, type UIMessage, convertToModelMessages } from 'ai';
+import { streamText, convertToModelMessages, type UIMessage } from 'ai';
 import type { NextRequest } from 'next/server';
 
 const JH_LIST = [
-  'ranchi','deoghar','netarhat','jamshedpur','hazaribagh','betla',
-  'dhanbad','bokaro','parasnath','giridih','chaibasa','palamu','latehar'
+  'ranchi', 'deoghar', 'netarhat', 'jamshedpur', 'hazaribagh', 'betla',
+  'dhanbad', 'bokaro', 'parasnath', 'giridih', 'chaibasa', 'palamu', 'latehar'
 ];
 
 function isJharkhandQuery(messages: UIMessage[]) {
+  // extract text from each UIMessage parts
   const text = messages
-    .map(m => (typeof m.content === 'string' ? m.content : ''))
+    .map(m => 
+      m.parts
+        .filter(p => p.type === 'text')
+        .map(p => p.text)
+        .join(' ')
+    )
     .join(' ')
     .toLowerCase();
-  return JH_LIST.some(d => text.includes(d));
+  return JH_LIST.some(loc => text.includes(loc));
 }
 
 function jsonResponse(data: any, status = 200) {
@@ -72,7 +79,7 @@ export async function POST(req: NextRequest) {
     const system =
       'You are PLANORA AI, a Jharkhand-only trip planner. Provide concise, day-wise itineraries, INR budgets, hotel booking tips with contact, weather notes, transport, and safety for Ranchi/Deoghar/Netarhat/Jamshedpur/Hazaribagh/Betla. Be practical and structured.';
 
-    // Build optional enhanced block when context indicates a plan
+    // enhanced block if context asks for planTrip
     const enhanced =
       context === 'planTrip'
         ? {
@@ -119,44 +126,22 @@ export async function POST(req: NextRequest) {
           }
         : undefined;
 
-    // If JSON mode preferred for planTrip:
     if (context === 'planTrip-json') {
       const base = { enhancementStatus: enhanced ? 'ok' : 'none' };
       return jsonResponse({ ...base, enhanced });
     }
 
-    // Default: stream text + prepend enhanced as SSE event
     const result = streamText({
       model: geminiModel,
-      messages: convertToModelMessages(messages),
       system,
+      messages: convertToModelMessages(messages),
     });
 
-    const { readable, writable } = new TransformStream();
-    const writer = writable.getWriter();
-
-    // Send enhanced first as a custom event for immediate UI render
-    if (enhanced) {
-      const firstChunk = `event: plan.enhanced\ndata: ${JSON.stringify(enhanced)}\n\n`;
-      await writer.write(new TextEncoder().encode(firstChunk));
-    }
-
-    const resp = result.toAIStreamResponse({
+    return result.toUIMessageStreamResponse({
       headers: {
         'x-model': model,
         'x-region': 'IN',
         'cache-control': 'no-store',
-      },
-    });
-
-    const original = (resp as Response).body!;
-    original.pipeTo(writable).catch(() => { /* swallow pipe errors on client disconnect */ });
-
-    return new Response(readable, {
-      headers: {
-        'content-type': 'text/event-stream; charset=utf-8',
-        'cache-control': 'no-store',
-        'x-powered-by': 'PLANORA AI',
       },
     });
   } catch (err: any) {

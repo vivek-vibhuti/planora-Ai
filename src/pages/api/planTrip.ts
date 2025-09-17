@@ -1,7 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { jharkhandAI } from '@/lib/ai';
+
 import { jharkhandSerpAPI } from '@/lib/serpApi';
 import { jharkhandWeather } from '@/lib/weather';
+// Ensure the file exists at src/lib/jharkhandAI.ts or adjust the import path accordingly
+import { jharkhandAI } from '../../lib/jharkhandAI';
 import type { TripRequest, CompleteTripPlan } from '@/types/trip';
 import { isValidJharkhandDestination, parseBudget } from '@/lib/utils';
 
@@ -77,20 +79,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     ]);
 
     // Step 3: Merge results safely
+    const defaultWeatherInfo = {
+      currentSeason: '',
+      temperature: '',
+      clothing: '',
+      precautions: '',
+      humidity: '',
+      windSpeed: '',
+      visibility: '',
+    };
+
     const enhancedTripPlan: CompleteTripPlan = {
       ...baseTripPlan,
-      weatherInfo:
-        weatherIntelligence
-          ? {
-              currentSeason: weatherIntelligence.currentSeason,
-              temperature: weatherIntelligence.temperature,
-              clothing: (weatherIntelligence.clothingRecommendations || []).join(', '),
-              precautions: (weatherIntelligence.seasonalConsiderations || []).join(', '),
-              humidity: baseTripPlan.weatherInfo?.humidity, // keep base or undefined
-              windSpeed: baseTripPlan.weatherInfo?.windSpeed,
-              visibility: baseTripPlan.weatherInfo?.visibility,
-            }
-          : baseTripPlan.weatherInfo,
+      weatherInfo: weatherIntelligence
+        ? {
+          currentSeason: weatherIntelligence.currentSeason,
+          temperature: weatherIntelligence.temperature,
+          clothing: (weatherIntelligence.clothingRecommendations || []).join(', '),
+          precautions: (weatherIntelligence.seasonalConsiderations || []).join(', '),
+          humidity: (baseTripPlan.weatherInfo && 'humidity' in baseTripPlan.weatherInfo) ? (baseTripPlan.weatherInfo as any).humidity : '',
+          windSpeed: (baseTripPlan.weatherInfo && 'windSpeed' in baseTripPlan.weatherInfo) ? (baseTripPlan.weatherInfo as any).windSpeed : '',
+          visibility: (baseTripPlan.weatherInfo && 'visibility' in baseTripPlan.weatherInfo) ? (baseTripPlan.weatherInfo as any).visibility : '',
+        }
+        : { ...defaultWeatherInfo, ...(baseTripPlan.weatherInfo || {}) },
       realTimeEnhancements: {
         attractionReviews: Array.isArray(reviews) ? reviews : [],
         localGuides: Array.isArray(guides) ? guides : [],
@@ -105,12 +116,43 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         },
       },
       enhancementStatus: '✅ Enhanced with real-time intelligence from SerpAPI & OpenWeather',
+      tripOverview: {
+        destination: '',
+        state: 'Jharkhand',
+        duration: '',
+        totalBudget: '',
+        budgetCategory: '',
+        bestTimeToVisit: '',
+        nearestAirport: '',
+        nearestRailway: '',
+        overview: ''
+      },
+      dailyItinerary: [],
+      budgetBreakdown: {
+        accommodation: '',
+        food: '',
+        transportation: '',
+        activities: '',
+        shopping: '',
+        miscellaneous: '',
+        total: '',
+        dailyAverage: ''
+      },
+      culturalExperiences: [],
+      emergencyContacts: {
+        jharkhandTourism: '',
+        police: '',
+        medical: '',
+        fireService: '',
+        localHelpline: ''
+      },
+      travelTips: []
     };
 
     const enhancementStats = {
-      reviewsFound: enhancedTripPlan.realTimeEnhancements.attractionReviews.length,
-      guidesFound: enhancedTripPlan.realTimeEnhancements.localGuides.length,
-      newsFound: enhancedTripPlan.realTimeEnhancements.currentNews.length,
+      reviewsFound: enhancedTripPlan.realTimeEnhancements?.attractionReviews?.length ?? 0,
+      guidesFound: enhancedTripPlan.realTimeEnhancements?.localGuides?.length ?? 0,
+      newsFound: enhancedTripPlan.realTimeEnhancements?.currentNews?.length ?? 0,
       weatherEnhanced: !!weatherIntelligence,
     };
 

@@ -226,8 +226,8 @@ export class JharkhandSerpAPI {
         title: a.title,
         snippet: a.snippet || 'Recent tourism update from Jharkhand',
         source: a.source || 'News',
-        date: a.date,
-        link: a.link,
+        date: a.date || '',
+        link: a.link || '',
         thumbnail: a.thumbnail,
         relevance: this.calculateRelevance(a.title, a.snippet || ''),
       });

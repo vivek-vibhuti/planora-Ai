@@ -61,7 +61,7 @@ export class JharkhandWeatherService {
 
       // Every 8th item approximates one day in the 3-hourly forecast (5-day window)
       return list
-        .filter((_, i) => i % 8 === 0)
+        .filter((_: any, i: number) => i % 8 === 0)
         .slice(0, 7)
         .map((item: any) => {
           const main = item?.main || {};

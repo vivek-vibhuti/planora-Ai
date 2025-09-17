@@ -15,7 +15,7 @@ interface Message {
 
 export default function ChatPageContent() {
   const searchParams = useSearchParams();
-  const context = searchParams.get('context');
+const context = searchParams?.get("context") ?? null;
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -117,15 +117,15 @@ export default function ChatPageContent() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50">
       {/* Header */}
-      <header className="bg-white/90 backdrop-blur-sm border-b border-gray-200 shadow-sm sticky top-0 z-30">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+      <header className="sticky top-0 z-30 border-b border-gray-200 shadow-sm bg-white/90 backdrop-blur-sm">
+        <div className="max-w-6xl px-4 mx-auto sm:px-6">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-xl flex items-center justify-center shadow-lg">
+              <div className="flex items-center justify-center w-10 h-10 shadow-lg bg-gradient-to-r from-green-500 to-blue-500 rounded-xl">
                 <Mountain className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-lg sm:text-xl font-bold text-gray-800">PLANORA AI</h1>
+                <h1 className="text-lg font-bold text-gray-800 sm:text-xl">PLANORA AI</h1>
                 <p className="text-xs text-gray-500 -mt-0.5">
                   {tripPlan ? `${tripPlan.tripOverview?.destination} Trip Assistant` : 'Chat Assistant'}
                 </p>
@@ -133,19 +133,19 @@ export default function ChatPageContent() {
             </div>
             <Link
               href="/"
-              className="text-gray-700 hover:text-green-600 font-medium transition-colors flex items-center gap-2"
+              className="flex items-center gap-2 font-medium text-gray-700 transition-colors hover:text-green-600"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="w-4 h-4" />
               Back to Home
             </Link>
           </div>
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8">
+      <div className="max-w-4xl px-4 py-6 mx-auto sm:py-8">
         {/* Title */}
-        <div className="text-center mb-6 sm:mb-8">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+        <div className="mb-6 text-center sm:mb-8">
+          <h2 className="mb-2 text-2xl font-bold text-gray-900 sm:text-3xl">
             {tripPlan ? `${tripPlan.tripOverview?.destination} Trip Assistant` : 'Chat with PLANORA AI'}
           </h2>
           <p className="text-gray-600">
@@ -155,13 +155,13 @@ export default function ChatPageContent() {
 
         {/* Trip Plan Summary */}
         {tripPlan && (
-          <div className="bg-white border border-green-200 rounded-xl p-4 sm:p-5 mb-6 shadow-sm">
-            <h3 className="font-semibold text-green-800 mb-3">Your Trip Plan</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              <Stat label="Destination" icon={<MapPin className="h-4 w-4" />} value={tripPlan.tripOverview?.destination} />
-              <Stat label="Duration" icon={<Calendar className="h-4 w-4" />} value={tripPlan.tripOverview?.duration} />
-              <Stat label="Budget" icon={<IndianRupee className="h-4 w-4" />} value={tripPlan.tripOverview?.totalBudget} />
-              <Stat label="Season" icon={<Mountain className="h-4 w-4" />} value={tripPlan.weatherInfo?.currentSeason} />
+          <div className="p-4 mb-6 bg-white border border-green-200 shadow-sm rounded-xl sm:p-5">
+            <h3 className="mb-3 font-semibold text-green-800">Your Trip Plan</h3>
+            <div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
+              <Stat label="Destination" icon={<MapPin className="w-4 h-4" />} value={tripPlan.tripOverview?.destination} />
+              <Stat label="Duration" icon={<Calendar className="w-4 h-4" />} value={tripPlan.tripOverview?.duration} />
+              <Stat label="Budget" icon={<IndianRupee className="w-4 h-4" />} value={tripPlan.tripOverview?.totalBudget} />
+              <Stat label="Season" icon={<Mountain className="w-4 h-4" />} value={tripPlan.weatherInfo?.currentSeason} />
             </div>
           </div>
         )}
@@ -180,7 +180,7 @@ export default function ChatPageContent() {
           </div>
 
           {/* Composer */}
-          <form onSubmit={handleSubmit} className="border-t bg-gray-50 p-3 sm:p-4">
+          <form onSubmit={handleSubmit} className="p-3 border-t bg-gray-50 sm:p-4">
             <div className="flex gap-2 sm:gap-3">
               <input
                 type="text"
@@ -198,7 +198,7 @@ export default function ChatPageContent() {
                 className="px-4 sm:px-6 py-2.5 sm:py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105 active:scale-95 shadow-lg"
                 aria-label="Send message"
               >
-                <Send className="h-5 w-5" />
+                <Send className="w-5 h-5" />
               </button>
             </div>
             <p className="text-[11px] sm:text-xs text-gray-500 mt-2 text-center">
@@ -213,8 +213,8 @@ export default function ChatPageContent() {
 
 function Stat({ label, icon, value }: { label: string; icon: React.ReactNode; value?: string }) {
   return (
-    <div className="rounded-lg border border-green-100 bg-green-50 p-3">
-      <div className="flex items-center gap-2 text-green-700 font-medium">
+    <div className="p-3 border border-green-100 rounded-lg bg-green-50">
+      <div className="flex items-center gap-2 font-medium text-green-700">
         {icon}
         <span>{label}</span>
       </div>
@@ -234,7 +234,7 @@ function ChatMessage({ role, content }: { role: Role; content: string }) {
           }`}
           aria-hidden
         >
-          {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+          {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
         </div>
         <div
           className={`rounded-lg p-3 sm:p-4 shadow-sm text-sm whitespace-pre-wrap leading-relaxed ${
@@ -251,10 +251,10 @@ function ChatMessage({ role, content }: { role: Role; content: string }) {
 function TypingIndicator() {
   return (
     <div className="flex gap-3 animate-fadeIn">
-      <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center">
-        <Bot className="h-4 w-4" />
+      <div className="flex items-center justify-center w-8 h-8 text-white bg-blue-600 rounded-full">
+        <Bot className="w-4 h-4" />
       </div>
-      <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-2">
+      <div className="px-4 py-2 border border-gray-200 rounded-lg bg-gray-50">
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-600">PLANORA AI is thinking</span>
           <div className="flex gap-1">
@@ -270,13 +270,13 @@ function TypingIndicator() {
 
 function WelcomeEmptyState() {
   return (
-    <div className="text-center text-gray-600 mt-12 sm:mt-16 max-w-2xl mx-auto">
-      <div className="mx-auto mb-4 flex items-center justify-center h-14 w-14 rounded-full bg-green-50 text-green-600">
+    <div className="max-w-2xl mx-auto mt-12 text-center text-gray-600 sm:mt-16">
+      <div className="flex items-center justify-center mx-auto mb-4 text-green-600 rounded-full h-14 w-14 bg-green-50">
         <Mountain className="h-7 w-7" />
       </div>
       <h3 className="text-lg font-semibold">Welcome to PLANORA AI</h3>
       <p className="mt-2 text-sm">Plan Jharkhand trips only—Ranchi, Deoghar, Netarhat, Jamshedpur, Hazaribagh, Betla.</p>
-      <div className="mt-5 grid grid-cols-2 md:grid-cols-3 gap-2 text-left">
+      <div className="grid grid-cols-2 gap-2 mt-5 text-left md:grid-cols-3">
         {[
           '3 days in Ranchi under ₹20000, waterfalls focus',
           'Family trip to Deoghar, temple timings and budget food',
@@ -287,13 +287,13 @@ function WelcomeEmptyState() {
         ].map((t) => (
           <span
             key={t}
-            className="bg-white border hover:bg-gray-50 text-gray-700 px-3 py-2 rounded-lg text-sm cursor-default"
+            className="px-3 py-2 text-sm text-gray-700 bg-white border rounded-lg cursor-default hover:bg-gray-50"
           >
             {t}
           </span>
         ))}
       </div>
-      <p className="text-xs mt-4 text-gray-400">Try: "Plan 3 days in Ranchi under ₹20000"</p>
+      <p className="mt-4 text-xs text-gray-400">Try: "Plan 3 days in Ranchi under ₹20000"</p>
     </div>
   );
 }

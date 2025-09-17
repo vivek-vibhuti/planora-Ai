@@ -13,7 +13,7 @@
     "@ai-sdk/react": "^2.0.43",
     "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^6.16.1",
-    "ai": "^5.0.43",
+    "ai": "^5.0.45",
     "axios": "^1.12.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.544.0",
